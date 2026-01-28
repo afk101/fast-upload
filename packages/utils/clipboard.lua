@@ -1,5 +1,5 @@
 local Text = require("packages.utils.text")
-local Env = require("packages.utils.env")
+local File = require("packages.utils.file")
 local M = {}
 
 -- 从剪切板获取文件路径的核心函数
@@ -54,22 +54,32 @@ function M.get_file_path_from_clipboard()
   -- 当使用截图工具截图并直接复制到剪切板时，剪切板中包含的是图像数据
   local image = hs.pasteboard.readImage()
   if image then
-      -- 加载环境变量
-      local env = Env.loadEnv()
-      -- 生成临时文件路径
-      -- 优先使用 .env 配置，其次是系统环境变量，最后默认 /tmp/
-      local temp_dir = env["TMPDIR"] or os.getenv("TMPDIR") or "/tmp/"
-      -- 确保路径以 / 结尾
-      if string.sub(temp_dir, -1) ~= "/" then
-          temp_dir = temp_dir .. "/"
-      end
-
-      local file_name = "upload_screenshot_" .. os.time() .. ".png"
-      local file_path = temp_dir .. file_name
+      local file_path = File.get_temp_file_path("upload_screenshot_", "png")
 
       -- 将图像保存为临时文件
       if image:saveToFile(file_path) then
           return file_path
+      end
+  end
+
+  -- 方法 4: 检查剪切板是否包含 SVG 代码文本
+  -- 当直接复制 SVG 代码时，将其保存为临时 SVG 文件
+  local text_content = hs.pasteboard.readString()
+  if text_content then
+      -- 简单的特征检测：检查是否包含 <svg 和 </svg> 标签
+      -- 移除首尾空白字符以提高匹配准确率
+      local trim_content = string.match(text_content, "^%s*(.-)%s*$")
+
+      if trim_content and string.find(trim_content, "^<svg") and string.find(trim_content, "</svg>$") then
+          local file_path = File.get_temp_file_path("upload_svg_", "svg")
+
+          -- 将 SVG 内容写入临时文件
+          local file = io.open(file_path, "w")
+          if file then
+              file:write(trim_content)
+              file:close()
+              return file_path
+          end
       end
   end
 
