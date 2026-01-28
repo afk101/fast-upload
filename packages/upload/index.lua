@@ -108,9 +108,45 @@ local function findNodePath()
     return "node" -- 如果都没找到，尝试直接使用命令名（依赖环境变量）
 end
 
+-- 辅助函数：解析快捷键配置
+-- 例如输入 "cmd+alt+X" 返回 {"cmd", "alt"}, "X"
+local function parseShortcut(str)
+  if not str or str == "" then
+    return nil, nil
+  end
+
+  local parts = {}
+  for part in string.gmatch(str, "([^+]+)") do
+    -- 去除前后空格
+    local p = part:match("^%s*(.-)%s*$")
+    if p and p ~= "" then
+      table.insert(parts, p)
+    end
+  end
+
+  if #parts < 1 then
+    return nil, nil
+  end
+
+  -- 最后一个部分作为按键，前面的作为修饰键
+  local key = table.remove(parts)
+  local mods = parts
+
+  return mods, key
+end
+
 -- 将快捷键对象存储在模块表 M 中，防止被垃圾回收机制清理导致快捷键失效
--- 快捷键绑定: Cmd + Alt + X
-M.uploadHotkey = hs.hotkey.bind({"cmd", "alt"}, "X", function()
+-- 读取配置并绑定快捷键
+local env = loadEnv()
+local mods, key = parseShortcut(env["UPLOAD_SHORTCUT"])
+
+-- 如果未配置或解析失败，使用默认快捷键 Cmd + Alt + X
+if not mods or not key then
+    mods = {"cmd", "alt"}
+    key = "X"
+end
+
+M.uploadHotkey = hs.hotkey.bind(mods, key, function()
   -- 1. 获取剪切板中的文件路径
   local filePath = get_file_path_from_clipboard()
   if not filePath then
