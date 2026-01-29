@@ -1,5 +1,13 @@
 import * as qcdn from '@q/qcdn';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 加载根目录下的 .env 文件
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // 从命令行参数获取文件路径
 const filePath = process.argv[2];
@@ -19,9 +27,13 @@ const keepName = allowedChars.test(fileName);
 
 try {
   const res = await qcdn.upload(filePath, {
-    https: true,
+    // 是否使用HTTPS (默认 true)
+    https: process.env.UPLOAD_HTTPS !== 'false',
     keepName: keepName,
-    min: true,
+    // 开启压缩 (默认 true)
+    min: process.env.UPLOAD_MIN !== 'false',
+    // 是否忽略错误 (默认 false)
+    force: process.env.UPLOAD_FORCE === 'true'
   });
 
   // 返回结果是一个对象，key 是本地路径，value 是远程 URL
