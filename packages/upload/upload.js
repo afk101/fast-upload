@@ -21,6 +21,7 @@ try {
   const res = await qcdn.upload(filePath, {
     https: true,
     keepName: keepName,
+    min: true,
   });
 
   // 返回结果是一个对象，key 是本地路径，value 是远程 URL
