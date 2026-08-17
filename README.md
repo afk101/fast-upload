@@ -16,7 +16,7 @@ cd ~/.hammerspoon
 | chrome | Chrome 快捷切换 | `Alt + Space` | [packages/chrome/README.md](packages/chrome/README.md) |
 | compress | 图片压缩 | `Cmd + Alt + M` | [packages/compress/README.md](packages/compress/README.md) |
 | merge-lines | 多行文本合并 | `Cmd + Alt + O` | [packages/merge-lines/README.md](packages/merge-lines/README.md) |
-| warp | warp 终端切换 | `Cmd + Alt + E` | [packages/warp/README.md](packages/warp/README.md) |
+| chatgpt | ChatGPT 应用切换 | `Cmd + Alt + E` | [packages/chatgpt/README.md](packages/chatgpt/README.md) |
 
 ## 快速开始
 
